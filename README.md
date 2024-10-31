@@ -101,3 +101,12 @@ This seggeration via separate gradle tasks would allow us to run the integration
 In current scenario the integration tests are localized, in the sense that it won't make a service call to the actual service that is deployed to a given stage, but it rather validates the end to end business logic using localized spring provided mechanisms. 
 
 In an ideal scenario, where you would typically have interactions over various downstream services and databeses, it would be better to call the endpoint to which the new code was deployed to validate if the service is working as expected with the new code and use that as part of the approval process. This probably woudl require some significant plumbing effort to establish and might be beyond the scope of this demonstration.
+
+
+## Note on Observability 
+
+The application has basic observability mechanisms in place, via logs and metrics. But these are as of now available within the context on the application instance. Logs are stereamed to console out and metrics are available via spring actuator endpoints. 
+
+This can be further extend, say for example using AWS Cloudwatch, where we should be able to stream the logs to Cloduwatch logs for storage and search. And use micrometer cloduwatch extension, to publish the metrics to cloudwatch metrics. 
+
+This would allow us to monitor the application health and configure alarms based on the metrics that we publish to get real time notifications about application health. 
