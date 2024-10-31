@@ -110,3 +110,25 @@ The application has basic observability mechanisms in place, via logs and metric
 This can be further extend, say for example using AWS Cloudwatch, where we should be able to stream the logs to Cloduwatch logs for storage and search. And use micrometer cloduwatch extension, to publish the metrics to cloudwatch metrics. 
 
 This would allow us to monitor the application health and configure alarms based on the metrics that we publish to get real time notifications about application health. 
+
+
+## CI/CD Design
+
+To take this application and convert it into a CI/CD based deployment, we should be able to use AWS CodePipeline to achieve the same. A typical minimal CI/CD pipleine design would be as follows
+
+![Alt text](./CI_CD_minimal.jpg "CI/CD Architecture")
+
+To estabilish this design we would have to use the following major AWS services 
+
+`AWS CodeCommit` - We would storing the code in an AWS Code Commit repo and developers would be interacting with this repo similar to normal git repo and push any code changes to the repo. AWS CodeCommit provides all the capabilities similar to any git repo in that you can choose which branch to deploy and use it to publish events to AWS Event bridge to AWS CodePipeline to trigger build
+
+`AWS CodeBuild` - Once the code is pushed to the repository we can use AWS EventBridge to publish a even notification which would trigger a build using `AWS CodeBuild`, we can integrate various aspects like Static Code scanners to validate if the code is fit to be built. Once it passes various code scanes we can build and publish our containirized docker image to ECR. 
+
+`AWS CodeDeploy` - Once the image is published to ECR, we should be able to use AWS Code Deploy to deploy the image to EKS using our the spec that we created, which should further spin up our service instances. 
+
+
+`AWS CodePipeline` - With these three fundamental aspects we should be able to establish a multi stage pipeline encapsulating them via `AWS CodePipeline` as follows : 
+
+![Alt text](./CI_CD_staged.jpg "CI/CD Architecture")
+
+We can phase out the deployment into different stages `Dev` -> `Test` -> `Prod` and each would be a stage in the code pipeline within its own environment. We can run validation tests at each of these stages before we promote the changes to the next stage. As mentioned before, we should able to utilize integration tests as one of the validation tests to make the approvals more of a HOTW (Hands of the wheel). But to begin with its alawys better to have a manual approval for promotion to prod, till we reach a level of confidence on automatic approval mechanims like integration tests, load tests and stress tests. 
